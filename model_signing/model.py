@@ -34,7 +34,7 @@ from sigstore._internal.fulcio.client import (
 import io
 from pathlib import Path
 from typing import Optional
-from serialize import Serializer
+from model_signing.serialize import Serializer
 import psutil
 import sys
 
@@ -64,11 +64,13 @@ class SigstoreSigner():
     def __init__(self,
                  disable_ambient: bool = False,
                  start_default_browser: bool = False,
-                 oidc_issuer: str = None):
-        self.signing_ctx = SigningContext.production()
+                 oidc_issuer: str = None,
+                 staging: bool = False):
+        self.signing_ctx = SigningContext.staging() if staging else SigningContext.production()
         self.disable_ambient = disable_ambient
         self.start_default_browser = start_default_browser
         self.oidc_issuer = oidc_issuer
+        self._staging = staging
         # NOTE: The client ID to use during OAuth2 flow.
         self.client_id = "sigstore"
 
@@ -82,9 +84,10 @@ class SigstoreSigner():
             if token:
                 return IdentityToken(token)
 
-        # TODO(): Support staging for testing.
         if self.oidc_issuer is not None:
             issuer = Issuer(self.oidc_issuer)
+        elif self._staging:
+            issuer = Issuer.staging()
         else:
             issuer = Issuer.production()
 
