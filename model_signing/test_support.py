@@ -32,7 +32,7 @@ UNUSED_PATH = pathlib.Path("unused")
 # All models to use in testing. Each of these is defined as a fixture in
 # conftest.py. Here, we used them as strings, these names must match the
 # function name used for the fixture.
-all_test_models = [
+all_test_models = frozenset([
     "sample_model_file",
     "sample_model_folder",
     "deep_model_folder",
@@ -40,25 +40,25 @@ all_test_models = [
     "empty_model_folder",
     "model_folder_with_empty_file",
     "symlink_model_folder",
-]
+])
 
 
 # All directory models to use in testing, where only non empty directory models
 # are supported. See also `all_test_models` comments.
-all_non_empty_directory_test_models = [
+all_non_empty_directory_test_models = frozenset([
     "sample_model_folder",
     "deep_model_folder",
     "model_folder_with_empty_file",
     "symlink_model_folder",
-]
+])
 
 
 # All files models to use in testing, where only file models are supported.
-all_file_test_models = [
+all_file_test_models = frozenset([
     "sample_model_file",
     "empty_model_file",
     "model_folder_with_empty_file",
-]
+])
 
 
 def get_first_directory(path: pathlib.Path) -> pathlib.Path:
