@@ -13,6 +13,7 @@
 # limitations under the License.
 """Functionality to sign and verify models with certificates."""
 
+from collections.abc import Sequence
 from typing import Self
 
 import certifi
@@ -39,7 +40,7 @@ def _load_single_cert(path: str) -> x509.Certificate:
     return cert
 
 
-def _load_multiple_certs(paths: list[str]) -> list[x509.Certificate]:
+def _load_multiple_certs(paths: Sequence[str]) -> list[x509.Certificate]:
     certs = b""
     for p in paths:
         with open(p, "rb") as fd:
@@ -58,7 +59,7 @@ class PKISigner(Signer):
         self,
         private_key: ec.EllipticCurvePrivateKey,
         signing_cert: x509.Certificate,
-        cert_chain: list[x509.Certificate],
+        cert_chain: Sequence[x509.Certificate],
     ) -> None:
         self._key_signer = ECKeySigner(private_key)
         self._signing_cert = signing_cert
@@ -77,7 +78,7 @@ class PKISigner(Signer):
         cls,
         private_key_path: str,
         signing_cert_path: str,
-        cert_chain_paths: list[str],
+        cert_chain_paths: Sequence[str],
     ) -> Self:
         private_key = load_ec_private_key(private_key_path)
         signing_cert = _load_single_cert(signing_cert_path)
@@ -86,7 +87,7 @@ class PKISigner(Signer):
 
     @staticmethod
     def __chain(
-        signing_cert: x509.Certificate, chain: list[x509.Certificate]
+        signing_cert: x509.Certificate, chain: Sequence[x509.Certificate]
     ) -> list[common_pb.X509Certificate]:
         result_chain = [
             common_pb.X509Certificate(
@@ -120,14 +121,16 @@ class PKIVerifier(Verifier):
     """Provides a verifier based on root certificates."""
 
     def __init__(
-        self, root_certs: list[x509.Certificate] | None = None
+        self, root_certs: Sequence[x509.Certificate] | None = None
     ) -> None:
         self._store = ssl_crypto.X509Store()
+        if root_certs is None:
+            root_certs = []
         for c in root_certs:
             self._store.add_cert(ssl_crypto.X509.from_cryptography(c))
 
     @classmethod
-    def from_paths(cls, root_cert_paths: list[str] | None = None) -> Self:
+    def from_paths(cls, root_cert_paths: Sequence[str] | None = None) -> Self:
         crypto_trust_roots: list[x509.Certificate] = []
         if root_cert_paths:
             crypto_trust_roots = _load_multiple_certs(root_cert_paths)
