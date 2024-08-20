@@ -19,6 +19,7 @@ as described by https://github.com/in-toto/attestation/tree/main/spec/v1. The
 envelope format is DSSE, see https://github.com/secure-systems-lab/dsse.
 """
 
+from collections.abc import Mapping
 import pathlib
 from typing import Any, Final, Self
 
@@ -46,7 +47,7 @@ class IntotoPayload(signing.SigningPayload):
 
     @classmethod
     def manifest_from_payload(
-        cls, payload: dict[str, Any]
+        cls, payload: Mapping[str, Any]
     ) -> manifest_module.Manifest:
         """Builds a manifest from an in-memory in-toto payload.
 
@@ -164,7 +165,7 @@ class SingleDigestIntotoPayload(IntotoPayload):
     @classmethod
     @override
     def manifest_from_payload(
-        cls, payload: dict[str, Any]
+        cls, payload: Mapping[str, Any]
     ) -> manifest_module.DigestManifest:
         """Builds a manifest from an in-memory in-toto payload.
 
@@ -325,7 +326,7 @@ class DigestOfDigestsIntotoPayload(IntotoPayload):
     @classmethod
     @override
     def manifest_from_payload(
-        cls, payload: dict[str, Any]
+        cls, payload: Mapping[str, Any]
     ) -> manifest_module.FileLevelManifest:
         """Builds a manifest from an in-memory in-toto payload.
 
@@ -468,7 +469,7 @@ class DigestOfShardDigestsIntotoPayload(IntotoPayload):
     @classmethod
     @override
     def manifest_from_payload(
-        cls, payload: dict[str, Any]
+        cls, payload: Mapping[str, Any]
     ) -> manifest_module.ShardLevelManifest:
         """Builds a manifest from an in-memory in-toto payload.
 
@@ -643,7 +644,7 @@ class DigestsIntotoPayload(IntotoPayload):
     @classmethod
     @override
     def manifest_from_payload(
-        cls, payload: dict[str, Any]
+        cls, payload: Mapping[str, Any]
     ) -> manifest_module.FileLevelManifest:
         """Builds a manifest from an in-memory in-toto payload.
 
@@ -776,7 +777,7 @@ class ShardDigestsIntotoPayload(IntotoPayload):
     @classmethod
     @override
     def manifest_from_payload(
-        cls, payload: dict[str, Any]
+        cls, payload: Mapping[str, Any]
     ) -> manifest_module.ShardLevelManifest:
         """Builds a manifest from an in-memory in-toto payload.
 
