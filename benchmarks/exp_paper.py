@@ -42,7 +42,7 @@ if __name__ == "__main__":
     paper_args = build_parser().parse_args()
 
     args = serialize.build_parser().parse_args(
-        [paper_args.path, "--use_shards", "--shard=1073741824"]
+        [paper_args.path, "--chunk=8388608", "--use_shards", "--shard=1073741824"]
     )
     times = timeit.repeat(
         lambda args=args: serialize.run(args),
