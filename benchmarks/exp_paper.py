@@ -38,6 +38,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=6,
     )
 
+    parser.add_argument(
+        "--sign",
+        help="whether to time sigstore signing time",
+        action="store_true",
+    )
+
     return parser
 
 
@@ -55,12 +61,17 @@ if __name__ == "__main__":
         ]
     )
 
+    print(paper_args.path)
     beacon = DangerousPublicOIDCBeacon()
     for _ in range(paper_args.repeat):
         st = time.time()
         payload = serialize.run(args)
         en = time.time()
-        hash_time = en - st
+        hash = en - st
+
+        if not paper_args.sign:
+            print(f"hash: {hash:0.4f}")
+            continue
 
         assert isinstance(payload, in_toto.IntotoPayload)
 
@@ -71,5 +82,6 @@ if __name__ == "__main__":
         st = time.time()
         sig = signer.sign(payload)
         en = time.time()
-        sign_time = en - st
-        print(f"hash time: {hash_time} total: {hash_time + sign_time}")
+        sign = en - st
+        total = hash + sign
+        print(f"hash: {hash:0.4f} sign: {sign:0.4f} total: {total:0.4f}")
