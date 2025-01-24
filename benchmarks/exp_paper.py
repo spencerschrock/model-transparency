@@ -16,16 +16,18 @@
 """Script for running paper benchmarks."""
 
 import argparse
-import timeit
+import time
 
+from oidc_token import DangerousPublicOIDCBeacon
 import serialize
+
+from model_signing.signing import in_toto
+from model_signing.signing import sign_sigstore as sigstore
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Builds the command line parser for the chunk experiment."""
-    parser = argparse.ArgumentParser(
-        description="paper benchmark data"
-    )
+    parser = argparse.ArgumentParser(description="paper benchmark data")
 
     parser.add_argument("path", help="path to model")
 
@@ -38,15 +40,36 @@ def build_parser() -> argparse.ArgumentParser:
 
     return parser
 
+
 if __name__ == "__main__":
     paper_args = build_parser().parse_args()
 
     args = serialize.build_parser().parse_args(
-        [paper_args.path, "--chunk=8388608", "--use_shards", "--shard=1073741824","--skip_manifest", "--hash_method=sha256"]
+        [
+            paper_args.path,
+            "--chunk=8388608",
+            "--use_shards",
+            "--shard=1073741824",
+            "--single_digest",
+            "--hash_method=sha256",
+        ]
     )
-    times = timeit.repeat(
-        lambda args=args: serialize.run(args),
-        number=1,
-        repeat=paper_args.repeat,
-    )
-    print(paper_args.path, times)
+
+    beacon = DangerousPublicOIDCBeacon()
+    for _ in range(paper_args.repeat):
+        st = time.time()
+        payload = serialize.run(args)
+        en = time.time()
+        hash_time = en - st
+
+        assert isinstance(payload, in_toto.IntotoPayload)
+
+        token = beacon.token()
+        signer = sigstore.SigstoreDSSESigner(
+            use_staging=True, identity_token=token
+        )
+        st = time.time()
+        sig = signer.sign(payload)
+        en = time.time()
+        sign_time = en - st
+        print(f"hash time: {hash_time} total: {hash_time + sign_time}")
