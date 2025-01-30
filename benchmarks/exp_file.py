@@ -44,6 +44,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=6,
     )
 
+    parser.add_argument(
+        "--by_file",
+        help="serialize by file, without file shards",
+        action="store_true",
+    )
+
     return parser
 
 
@@ -60,16 +66,18 @@ if __name__ == "__main__":
             )
             generate.generate_file(gen_args)
 
-            ser_args = serialize.build_parser().parse_args(
-                [
-                    args.path,
-                    "--chunk=8388608",
-                    "--use_shards",
-                    "--shard=1073741824",
-                    "--single_digest",
-                    "--hash_method=sha256",
-                ]
-            )
+            passed_args = [
+                args.path,
+                "--chunk=8388608",
+                "--single_digest",
+                "--hash_method=sha256",
+            ]
+
+            if not args.by_file:
+                passed_args.append("--use_shards")
+                passed_args.append("--shard=1073741824")
+
+            ser_args = serialize.build_parser().parse_args(passed_args)
 
             times = []
             for _ in range(args.repeat):
