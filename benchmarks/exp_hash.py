@@ -58,16 +58,6 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _human_size(size: int) -> str:
-    if size >= GB:
-        return str(size / GB) + " GB"
-    elif size >= MB:
-        return str(size / MB) + " MB"
-    elif size >= KB:
-        return str(size / KB) + " KB"
-    return str(size) + " B"
-
-
 def _get_hasher(hash_algorithm: str) -> hashing.StreamingHashEngine:
     # TODO: Once Python 3.9 support is deprecated revert to using `match`
     if hash_algorithm == "sha256":
