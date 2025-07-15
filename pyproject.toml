@@ -89,6 +89,8 @@ Use `hatch run +py=3... bench:chunk ${args}` to benchmark the chunk size paramet
 """
 extra-dependencies = [
   "numpy",
+  "psutil",
+  "py-cpuinfo",
 ]
 
 [[tool.hatch.envs.bench.matrix]]
